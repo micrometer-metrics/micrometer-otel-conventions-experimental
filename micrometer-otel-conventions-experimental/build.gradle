@@ -1,0 +1,24 @@
+description 'Module containing implementations of Micrometer Observation naming conventions'
+
+dependencies {
+	api project(":micrometer-otel-conventions-experimental-semver")
+	api 'io.micrometer:micrometer-observation'
+
+	// log monitoring
+	testImplementation 'com.squareup.okhttp3:okhttp'
+	testImplementation 'org.apache.logging.log4j:log4j-core'
+
+	testImplementation 'io.micrometer:micrometer-core'
+	testImplementation 'io.micrometer:micrometer-observation-test'
+
+	// JUnit 5
+	testImplementation 'org.junit.jupiter:junit-jupiter'
+
+	testImplementation 'org.mockito:mockito-inline'
+
+	testImplementation 'org.assertj:assertj-core'
+	testImplementation 'org.awaitility:awaitility'
+
+	testImplementation 'ru.lanwen.wiremock:wiremock-junit5'
+	testImplementation 'com.github.tomakehurst:wiremock-jre8-standalone'
+}

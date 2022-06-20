@@ -1,0 +1,26 @@
+plugins {
+    id 'java-platform'
+}
+
+description 'Micrometer OTel conventions BOM (Bill of Materials) for managing Micrometer OTel conventions artifact versions'
+
+dependencies {
+    constraints {
+        rootProject.subprojects.findAll {
+            !it.name.contains('sample') &&
+                    !it.name.contains('-bom')
+        }.each {
+            api(group: it.group,
+                    name: it.name,
+                    version: it.version.toString())
+        }
+    }
+}
+
+publishing {
+    publications {
+        nebula(MavenPublication) {
+            from components.javaPlatform
+        }
+    }
+}
