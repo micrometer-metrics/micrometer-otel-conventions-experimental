@@ -13,15 +13,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.micrometer.convention.http.tag;
+package io.micrometer.convention.otel.http;
 
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import io.micrometer.common.KeyValue;
 import io.micrometer.conventions.common.AttributeType;
+import io.micrometer.observation.Observation;
 import io.micrometer.observation.transport.http.HttpRequest;
 import io.micrometer.observation.transport.http.HttpResponse;
+import io.micrometer.observation.transport.http.context.HttpContext;
 import io.micrometer.observation.transport.http.tags.HttpKeyValuesConvention;
 
 /**
@@ -31,7 +33,7 @@ import io.micrometer.observation.transport.http.tags.HttpKeyValuesConvention;
  * @since 1.10.0
  */
 // TODO: What to do if request is not set? UNKNOWN?
-abstract class OpenTelemetryHttpKeyValuesConvention implements HttpKeyValuesConvention {
+abstract class OpenTelemetryHttpConvention<REQ extends HttpRequest, RES extends HttpResponse, CONTEXT extends HttpContext<REQ, RES>> implements HttpKeyValuesConvention, Observation.ObservationConvention<CONTEXT> {
 
     // TODO: This is just an example
     private static final Predicate<Object> METHOD_PREDICATE = s -> isTypeCorrect(

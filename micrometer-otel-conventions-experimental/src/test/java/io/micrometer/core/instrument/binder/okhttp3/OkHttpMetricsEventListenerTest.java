@@ -21,8 +21,8 @@ import java.util.function.Function;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import io.micrometer.common.KeyValue;
 import io.micrometer.common.KeyValues;
-import io.micrometer.convention.http.name.OpenTelemetryHttpClientSemanticNameProvider;
-import io.micrometer.convention.http.tag.OpenTelemetryHttpClientKeyValuesConvention;
+import io.micrometer.convention.otel.OpenTelemetryConventions;
+import io.micrometer.convention.otel.http.OpenTelemetryHttpClientConventions;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.MockClock;
 import io.micrometer.core.instrument.Tags;
@@ -71,8 +71,6 @@ class OkHttpMetricsEventListenerTest {
     void timeSuccessfulWithLegacyObservation(@WiremockResolver.Wiremock WireMockServer server) throws IOException {
         ObservationRegistry observationRegistry = ObservationRegistry.create();
         TestHandler testHandler = new TestHandler();
-        observationRegistry.observationConfig()
-                .namingConfiguration(ObservationRegistry.ObservationNamingConfiguration.DEFAULT);
         observationRegistry.observationConfig().observationHandler(testHandler);
         observationRegistry.observationConfig().observationHandler(new TimerObservationHandler(registry));
         client = new OkHttpClient.Builder()
@@ -95,16 +93,17 @@ class OkHttpMetricsEventListenerTest {
     void timeSuccessfulWithStandardizedObservation(@WiremockResolver.Wiremock WireMockServer server)
             throws IOException {
         ObservationRegistry observationRegistry = ObservationRegistry.create();
-        ObservationRegistry.ObservationNamingConfiguration configuration = ObservationRegistry.ObservationNamingConfiguration.STANDARDIZED;
-        observationRegistry.observationConfig().namingConfiguration(configuration);
-        OpenTelemetryHttpClientKeyValuesConvention otelHttpClientKeyValuesConvention = new OpenTelemetryHttpClientKeyValuesConvention();
-        observationRegistry.observationConfig()
-                .semanticNameProvider(new OpenTelemetryHttpClientSemanticNameProvider(configuration));
+
+        // OTEL
+        observationRegistry.observationConfig().observationConvention(OpenTelemetryConventions.all());
+
         observationRegistry.observationConfig().observationHandler(new TimerObservationHandler(registry));
         client = new OkHttpClient.Builder()
                 .eventListener(defaultListenerBuilder().observationRegistry(observationRegistry)
-                        .keyValuesProvider(new OTelOkHttpKeyValuesProvider(otelHttpClientKeyValuesConvention)).build())
+                        .build())
                 .build();
+
+
         server.stubFor(any(anyUrl()));
         Request request = new Request.Builder().url(server.baseUrl()).build();
 
@@ -117,20 +116,31 @@ class OkHttpMetricsEventListenerTest {
                         "http.user_agent", "net.peer.ip", "net.peer.name", "net.peer.port")
                 .timer().count()).isEqualTo(1L);
     }
+    @Test
+    void timeSuccessfulWithCustomConvention(@WiremockResolver.Wiremock WireMockServer server)
+            throws IOException {
+        ObservationRegistry observationRegistry = ObservationRegistry.create();
 
-    private void testRequestTags(@WiremockResolver.Wiremock WireMockServer server, Request request) throws IOException {
-        server.stubFor(any(anyUrl()));
-        OkHttpClient client = new OkHttpClient.Builder()
-                .eventListener(OkHttpMetricsEventListener.builder(registry, "okhttp.requests")
-                        .uriMapper(req -> req.url().encodedPath()).tags(Tags.of("foo", "bar")).build())
+        // OTEL
+        OpenTelemetryHttpClientConventions convention = new OpenTelemetryHttpClientConventions();
+
+        observationRegistry.observationConfig().observationConvention(OpenTelemetryConventions.all());
+
+        observationRegistry.observationConfig().observationHandler(new TimerObservationHandler(registry));
+        client = new OkHttpClient.Builder()
+                .eventListener(defaultListenerBuilder().observationRegistry(observationRegistry)
+                        .observationConvention(new MyOkHttpObservationConvention(convention))
+                        .build())
                 .build();
+
+
+        server.stubFor(any(anyUrl()));
+        Request request = new Request.Builder().url(server.baseUrl()).build();
 
         client.newCall(request).execute().close();
 
-        assertThat(registry.get("okhttp.requests")
-                .tags("foo", "bar", "uri", "/helloworld.txt", "status", "200", "requestTag1", "tagValue1",
-                        "target.host", "localhost", "target.port", String.valueOf(server.port()), "target.scheme",
-                        "http")
+        assertThat(registry.get("different.name")
+                .tagKeys("net.peer.name")
                 .timer().count()).isEqualTo(1L);
     }
 
@@ -150,19 +160,23 @@ class OkHttpMetricsEventListenerTest {
 
     }
 
-    static class OTelOkHttpKeyValuesProvider implements OkHttpKeyValuesProvider {
+    static class MyOkHttpObservationConvention implements OkHttpObservationConvention {
 
         private final HttpClientKeyValuesConvention convention;
 
-        OTelOkHttpKeyValuesProvider(HttpClientKeyValuesConvention convention) {
+        MyOkHttpObservationConvention(HttpClientKeyValuesConvention convention) {
             this.convention = convention;
         }
 
         @Override
         public KeyValues getLowCardinalityKeyValues(OkHttpContext context) {
-            return this.convention.all(context.getRequest(), context.getResponse());
+            return KeyValues.of(this.convention.peerName(context.getRequest()));
         }
 
+        @Override
+        public String getName() {
+            return "different.name";
+        }
     }
 
 }

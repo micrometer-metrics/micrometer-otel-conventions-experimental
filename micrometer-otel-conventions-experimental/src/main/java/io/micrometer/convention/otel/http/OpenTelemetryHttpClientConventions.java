@@ -13,10 +13,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.micrometer.convention.http.tag;
+package io.micrometer.convention.otel.http;
 
 import io.micrometer.common.KeyValue;
+import io.micrometer.common.KeyValues;
+import io.micrometer.observation.Observation;
+import io.micrometer.observation.transport.http.HttpClientRequest;
+import io.micrometer.observation.transport.http.HttpClientResponse;
 import io.micrometer.observation.transport.http.HttpRequest;
+import io.micrometer.observation.transport.http.context.HttpClientContext;
 import io.micrometer.observation.transport.http.tags.HttpClientKeyValuesConvention;
 
 /**
@@ -26,7 +31,7 @@ import io.micrometer.observation.transport.http.tags.HttpClientKeyValuesConventi
  * @since 1.10.0
  */
 // TODO: What to do if request is not set? UNKNOWN?
-public class OpenTelemetryHttpClientKeyValuesConvention extends OpenTelemetryHttpKeyValuesConvention
+public class OpenTelemetryHttpClientConventions extends OpenTelemetryHttpConvention<HttpClientRequest, HttpClientResponse, HttpClientContext>
         implements HttpClientKeyValuesConvention {
 
     @Override
@@ -34,4 +39,18 @@ public class OpenTelemetryHttpClientKeyValuesConvention extends OpenTelemetryHtt
         return OpenTelemetryHttpClientLowCardinalityKeyNames.PEER_NAME.of("UNKNOWN");
     }
 
+    @Override
+    public String getName() {
+        return "http.client.duration";
+    }
+
+    @Override
+    public boolean supportsContext(Observation.Context context) {
+        return context instanceof HttpClientContext;
+    }
+
+    @Override
+    public KeyValues getLowCardinalityKeyValues(HttpClientContext context) {
+        return all(context.getRequest(), context.getResponse());
+    }
 }
