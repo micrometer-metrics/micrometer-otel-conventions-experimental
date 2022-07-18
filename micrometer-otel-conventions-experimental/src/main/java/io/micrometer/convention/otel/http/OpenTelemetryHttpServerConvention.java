@@ -27,7 +27,8 @@ import io.micrometer.observation.transport.RequestReplyReceiverContext;
  * @since 1.0.0
  */
 // TODO: What to do if request is not set? UNKNOWN?
-public abstract class OpenTelemetryHttpServerConvention<REQ, RES>  extends OpenTelemetryHttpConvention<REQ, RES, RequestReplyReceiverContext<REQ, RES>>
+public abstract class OpenTelemetryHttpServerConvention<REQ, RES>
+        extends OpenTelemetryHttpConvention<REQ, RES, RequestReplyReceiverContext<REQ, RES>>
         implements HttpServerKeyValuesConvention<REQ, RES> {
 
     @Override
@@ -59,4 +60,5 @@ public abstract class OpenTelemetryHttpServerConvention<REQ, RES>  extends OpenT
     public boolean supportsContext(Observation.Context context) {
         return context instanceof RequestReplyReceiverContext;
     }
+
 }

@@ -30,7 +30,8 @@ import java.util.stream.Stream;
  * @since 1.0.0
  */
 // TODO: What to do if request is not set? UNKNOWN?
-abstract class OpenTelemetryHttpConvention<REQ, RES, CONTEXT extends Observation.Context> implements HttpKeyValuesConvention<REQ, RES>, Observation.ObservationConvention<CONTEXT> {
+abstract class OpenTelemetryHttpConvention<REQ, RES, CONTEXT extends Observation.Context>
+        implements HttpKeyValuesConvention<REQ, RES>, Observation.ObservationConvention<CONTEXT> {
 
     // TODO: This is just an example
     private static final Predicate<Object> METHOD_PREDICATE = s -> isTypeCorrect(

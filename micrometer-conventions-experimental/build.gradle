@@ -1,8 +1,7 @@
-description 'Module containing implementations of Micrometer Observation naming conventions'
+description 'Module containing common Micrometer Conventions code'
 
 dependencies {
-	api project(":micrometer-conventions-experimental")
-	api project(":micrometer-otel-conventions-experimental-semver")
+	api 'io.micrometer:micrometer-commons'
 	api 'io.micrometer:micrometer-observation'
 
 	// log monitoring

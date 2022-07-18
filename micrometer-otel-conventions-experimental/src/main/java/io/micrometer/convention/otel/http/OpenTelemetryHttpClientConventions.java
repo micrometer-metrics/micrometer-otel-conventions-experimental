@@ -28,7 +28,8 @@ import io.micrometer.observation.transport.RequestReplySenderContext;
  * @since 1.0.0
  */
 // TODO: What to do if request is not set? UNKNOWN?
-public abstract class OpenTelemetryHttpClientConventions<REQ, RES> extends OpenTelemetryHttpConvention<REQ, RES, RequestReplySenderContext<REQ, RES>>
+public abstract class OpenTelemetryHttpClientConventions<REQ, RES>
+        extends OpenTelemetryHttpConvention<REQ, RES, RequestReplySenderContext<REQ, RES>>
         implements HttpClientKeyValuesConvention<REQ, RES> {
 
     @Override
@@ -50,4 +51,5 @@ public abstract class OpenTelemetryHttpClientConventions<REQ, RES> extends OpenT
     public KeyValues getLowCardinalityKeyValues(RequestReplySenderContext context) {
         return all((REQ) context.getCarrier(), (RES) context.getResponse());
     }
+
 }

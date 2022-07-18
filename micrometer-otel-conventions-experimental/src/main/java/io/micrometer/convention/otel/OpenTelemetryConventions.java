@@ -34,7 +34,8 @@ public final class OpenTelemetryConventions {
      * Provides all HTTP related conventions.
      * @return collection of HTTP conventions
      */
-    public static Collection<Observation.ObservationConvention<?>> http(OpenTelemetryHttpClientConventions<?, ?> client, OpenTelemetryHttpServerConvention<?, ?> server) {
+    public static Collection<Observation.ObservationConvention<?>> http(OpenTelemetryHttpClientConventions<?, ?> client,
+            OpenTelemetryHttpServerConvention<?, ?> server) {
         return Arrays.asList(client, server);
     }
 
@@ -42,7 +43,9 @@ public final class OpenTelemetryConventions {
      * Provides all OTel conventions.
      * @return all OTel conventions
      */
-    public static Collection<Observation.ObservationConvention<?>> all(OpenTelemetryHttpClientConventions<?, ?> client, OpenTelemetryHttpServerConvention<?, ?> server) {
+    public static Collection<Observation.ObservationConvention<?>> all(OpenTelemetryHttpClientConventions<?, ?> client,
+            OpenTelemetryHttpServerConvention<?, ?> server) {
         return http(client, server);
     }
+
 }

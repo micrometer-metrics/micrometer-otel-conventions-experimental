@@ -102,9 +102,8 @@ class OkHttpObservationInterceptorTest {
 
     @Test
     void timeSuccessfulWithObservationConvention(@WiremockResolver.Wiremock WireMockServer server) throws IOException {
-        client = new OkHttpClient.Builder()
-                .addInterceptor(defaultInterceptorBuilder()
-                        .observationConvention(new StandardizedOkHttpObservationConvention(new OkHttpOtelConvention())).build())
+        client = new OkHttpClient.Builder().addInterceptor(defaultInterceptorBuilder()
+                .observationConvention(new StandardizedOkHttpObservationConvention(new OkHttpOtelConvention())).build())
                 .build();
         server.stubFor(any(anyUrl()));
         Request request = new Request.Builder().url(server.baseUrl()).build();
@@ -157,7 +156,8 @@ class OkHttpObservationInterceptorTest {
 
         @Override
         public KeyValues getLowCardinalityKeyValues(OkHttpContext context) {
-            return KeyValues.of(convention.peerName(context.getState().request));
+            return KeyValues.of(convention.peerName(context.getState().request),
+                    convention.method(context.getState().request));
         }
 
         @Override
