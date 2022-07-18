@@ -13,78 +13,67 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.micrometer.convention.otel.http;
+package io.micrometer.convention;
 
-import io.micrometer.common.docs.KeyName;
-import io.micrometer.conventions.semantic.SemanticAttributes;
+import io.micrometer.common.KeyValue;
+import io.micrometer.common.KeyValues;
 
 /**
- * Conventions for HTTP server key names implemented with OpenTelemetry.
+ * Conventions for HTTP server key values.
  *
  * @author Marcin Grzejszczak
  * @since 1.0.0
  */
-public enum OpenTelemetryHttpServerLowCardinalityKeyNames implements KeyName {
+// TODO: This could go to a separate, "core" module?
+public interface HttpServerKeyValuesConvention<REQ, RES> extends HttpKeyValuesConvention<REQ, RES> {
 
     /**
      * The primary server name of the matched virtual host. This should be obtained via
      * configuration. If no such configuration can be obtained, this attribute MUST NOT be
      * set ( net.host.name should be used instead).
-     *
+     * <p>
      * Examples: example.com
-     * @param request
-     * @return
+     * @param request HTTP request
+     * @return key value
      */
-    SERVER_NAME {
-        @Override
-        public String getKeyName() {
-            return SemanticAttributes.HTTP_SERVER_NAME.getKey();
-        }
-    },
+    KeyValue serverName(REQ request);
 
-    // TODO: In OTEL - we will set not templated version
+    // TODO: In OTel - we will set not templated version
+
     /**
      * The matched route.
-     *
+     * <p>
      * Examples: /users/5
-     * @param request
-     * @return
+     * @param request HTTP request
+     * @return key value
      */
-    ROUTE {
-        @Override
-        public String getKeyName() {
-            return SemanticAttributes.HTTP_ROUTE.getKey();
-        }
-    },
+    KeyValue route(REQ request);
 
     // TODO: Not in OTEL
+
     /**
      * The matched route (path template).
-     *
+     * <p>
      * Examples: /users/:userID?
-     * @param request
-     * @return
+     * @param request HTTP request
+     * @return key value
      */
-    TEMPLATED_ROUTE {
-        @Override
-        public String getKeyName() {
-            return "http.route.templated";
-        }
-    },
+    KeyValue templatedRoute(REQ request);
 
     /**
      * The IP address of the original client behind all proxies, if known (e.g. from
      * X-Forwarded-For).
-     *
+     * <p>
      * Examples: 83.164.160.102
-     * @param request
-     * @return
+     * @param request HTTP request
+     * @return key value
      */
-    CLIENT_IP {
-        @Override
-        public String getKeyName() {
-            return SemanticAttributes.HTTP_CLIENT_IP.getKey();
-        }
-    },
+    KeyValue clientIp(REQ request);
+
+    @Override
+    default KeyValues all(REQ request, RES response) {
+        return HttpKeyValuesConvention.super.all(request, response).and(serverName(request), route(request),
+                templatedRoute(request), clientIp(request));
+    }
 
 }

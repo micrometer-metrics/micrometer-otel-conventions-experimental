@@ -13,18 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.micrometer.convention.otel.http;
+package io.micrometer.convention;
 
-import io.micrometer.common.docs.KeyName;
-import io.micrometer.conventions.semantic.SemanticAttributes;
+import io.micrometer.common.KeyValue;
+import io.micrometer.common.KeyValues;
 
 /**
- * Conventions for HTTP client key names implemented with OpenTelemetry.
+ * Conventions for HTTP client key values.
  *
  * @author Marcin Grzejszczak
  * @since 1.0.0
  */
-public enum OpenTelemetryHttpClientLowCardinalityKeyNames implements KeyName {
+// TODO: This could go to a separate, "core" module?
+public interface HttpClientKeyValuesConvention<REQ, RES> extends HttpKeyValuesConvention<REQ, RES> {
 
     /**
      * Remote hostname or similar, see note below.
@@ -32,14 +33,14 @@ public enum OpenTelemetryHttpClientLowCardinalityKeyNames implements KeyName {
      * Examples: example.com
      *
      * SHOULD NOT be set if capturing it would require an extra DNS lookup.
-     * @param request
-     * @return
+     * @param request HTTP request
+     * @return key value
      */
-    PEER_NAME {
-        @Override
-        public String getKeyName() {
-            return SemanticAttributes.NET_PEER_NAME.getKey();
-        }
+    KeyValue peerName(REQ request);
+
+    @Override
+    default KeyValues all(REQ request, RES response) {
+        return HttpKeyValuesConvention.super.all(request, response).and(peerName(request));
     }
 
 }

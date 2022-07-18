@@ -15,25 +15,22 @@
  */
 package io.micrometer.convention.otel.http;
 
-import java.util.function.Predicate;
-import java.util.stream.Stream;
-
 import io.micrometer.common.KeyValue;
+import io.micrometer.convention.HttpKeyValuesConvention;
 import io.micrometer.conventions.common.AttributeType;
 import io.micrometer.observation.Observation;
-import io.micrometer.observation.transport.http.HttpRequest;
-import io.micrometer.observation.transport.http.HttpResponse;
-import io.micrometer.observation.transport.http.context.HttpContext;
-import io.micrometer.observation.transport.http.tags.HttpKeyValuesConvention;
+
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 /**
  * Conventions for HTTP key values implemented with OpenTelemetry.
  *
  * @author Marcin Grzejszczak
- * @since 1.10.0
+ * @since 1.0.0
  */
 // TODO: What to do if request is not set? UNKNOWN?
-abstract class OpenTelemetryHttpConvention<REQ extends HttpRequest, RES extends HttpResponse, CONTEXT extends HttpContext<REQ, RES>> implements HttpKeyValuesConvention, Observation.ObservationConvention<CONTEXT> {
+abstract class OpenTelemetryHttpConvention<REQ, RES, CONTEXT extends Observation.Context> implements HttpKeyValuesConvention<REQ, RES>, Observation.ObservationConvention<CONTEXT> {
 
     // TODO: This is just an example
     private static final Predicate<Object> METHOD_PREDICATE = s -> isTypeCorrect(
@@ -42,62 +39,64 @@ abstract class OpenTelemetryHttpConvention<REQ extends HttpRequest, RES extends 
                     .anyMatch(method -> method.equalsIgnoreCase(((String) s)));
 
     @Override
-    public KeyValue method(HttpRequest request) {
-        return OpenTelemetryHttpLowCardinalityKeyNames.METHOD.of(request.method(), METHOD_PREDICATE);
+    public KeyValue method(REQ request) {
+        return OpenTelemetryHttpLowCardinalityKeyNames.METHOD.of(methodValue(request), METHOD_PREDICATE);
     }
 
+    protected abstract String methodValue(REQ request);
+
     @Override
-    public KeyValue url(HttpRequest request) {
+    public KeyValue url(REQ request) {
         return OpenTelemetryHttpLowCardinalityKeyNames.URL.of("UNKNOWN");
     }
 
     @Override
-    public KeyValue target(HttpRequest request) {
+    public KeyValue target(REQ request) {
         return OpenTelemetryHttpLowCardinalityKeyNames.TARGET.of("UNKNOWN");
     }
 
     @Override
-    public KeyValue host(HttpRequest request) {
+    public KeyValue host(REQ request) {
         return OpenTelemetryHttpLowCardinalityKeyNames.HOST.of("UNKNOWN");
     }
 
     @Override
-    public KeyValue scheme(HttpRequest request) {
+    public KeyValue scheme(REQ request) {
         return OpenTelemetryHttpLowCardinalityKeyNames.SCHEME.of("UNKNOWN");
     }
 
     @Override
-    public KeyValue statusCode(HttpResponse response) {
+    public KeyValue statusCode(RES response) {
         return OpenTelemetryHttpLowCardinalityKeyNames.STATUS_CODE.of("UNKNOWN");
     }
 
     @Override
-    public KeyValue flavor(HttpRequest request) {
+    public KeyValue flavor(REQ request) {
         return OpenTelemetryHttpLowCardinalityKeyNames.FLAVOR.of("UNKNOWN");
     }
 
     @Override
-    public KeyValue userAgent(HttpRequest request) {
+    public KeyValue userAgent(REQ request) {
         return OpenTelemetryHttpLowCardinalityKeyNames.USER_AGENT.of("UNKNOWN");
     }
 
     @Override
-    public KeyValue requestContentLength(HttpRequest request) {
+    public KeyValue requestContentLength(REQ request) {
         return OpenTelemetryHttpLowCardinalityKeyNames.REQUEST_CONTENT_LENGTH.of("UNKNOWN");
     }
 
     @Override
-    public KeyValue responseContentLength(HttpResponse response) {
+    public KeyValue responseContentLength(RES response) {
         return OpenTelemetryHttpLowCardinalityKeyNames.RESPONSE_CONTENT_LENGTH.of("UNKNOWN");
     }
 
     @Override
-    public KeyValue ip(HttpRequest request) {
+    public KeyValue ip(REQ request) {
         return OpenTelemetryHttpLowCardinalityKeyNames.IP.of("UNKNOWN");
     }
 
     @Override
-    public KeyValue port(HttpRequest request) {
+    public KeyValue port(REQ request) {
         return OpenTelemetryHttpLowCardinalityKeyNames.PORT.of("UNKNOWN");
     }
 

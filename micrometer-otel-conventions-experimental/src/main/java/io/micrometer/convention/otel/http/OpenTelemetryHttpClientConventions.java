@@ -17,25 +17,22 @@ package io.micrometer.convention.otel.http;
 
 import io.micrometer.common.KeyValue;
 import io.micrometer.common.KeyValues;
+import io.micrometer.convention.HttpClientKeyValuesConvention;
 import io.micrometer.observation.Observation;
-import io.micrometer.observation.transport.http.HttpClientRequest;
-import io.micrometer.observation.transport.http.HttpClientResponse;
-import io.micrometer.observation.transport.http.HttpRequest;
-import io.micrometer.observation.transport.http.context.HttpClientContext;
-import io.micrometer.observation.transport.http.tags.HttpClientKeyValuesConvention;
+import io.micrometer.observation.transport.RequestReplySenderContext;
 
 /**
  * Conventions for HTTP key values implemented with OpenTelemetry.
  *
  * @author Marcin Grzejszczak
- * @since 1.10.0
+ * @since 1.0.0
  */
 // TODO: What to do if request is not set? UNKNOWN?
-public class OpenTelemetryHttpClientConventions extends OpenTelemetryHttpConvention<HttpClientRequest, HttpClientResponse, HttpClientContext>
-        implements HttpClientKeyValuesConvention {
+public abstract class OpenTelemetryHttpClientConventions<REQ, RES> extends OpenTelemetryHttpConvention<REQ, RES, RequestReplySenderContext<REQ, RES>>
+        implements HttpClientKeyValuesConvention<REQ, RES> {
 
     @Override
-    public KeyValue peerName(HttpRequest request) {
+    public KeyValue peerName(REQ request) {
         return OpenTelemetryHttpClientLowCardinalityKeyNames.PEER_NAME.of("UNKNOWN");
     }
 
@@ -46,11 +43,11 @@ public class OpenTelemetryHttpClientConventions extends OpenTelemetryHttpConvent
 
     @Override
     public boolean supportsContext(Observation.Context context) {
-        return context instanceof HttpClientContext;
+        return context instanceof RequestReplySenderContext;
     }
 
     @Override
-    public KeyValues getLowCardinalityKeyValues(HttpClientContext context) {
-        return all(context.getRequest(), context.getResponse());
+    public KeyValues getLowCardinalityKeyValues(RequestReplySenderContext context) {
+        return all((REQ) context.getCarrier(), (RES) context.getResponse());
     }
 }

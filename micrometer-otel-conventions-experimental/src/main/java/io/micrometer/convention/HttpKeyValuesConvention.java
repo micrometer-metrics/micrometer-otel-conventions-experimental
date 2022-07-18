@@ -13,32 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.micrometer.convention.otel.http;
+package io.micrometer.convention;
 
-import io.micrometer.common.docs.KeyName;
-import io.micrometer.conventions.semantic.SemanticAttributes;
+import io.micrometer.common.KeyValue;
+import io.micrometer.common.KeyValues;
+import io.micrometer.observation.Observation;
 
 /**
- * Conventions for HTTP key names implemented with OpenTelemetry.
+ * Conventions for HTTP key values.
  *
  * @author Marcin Grzejszczak
  * @since 1.0.0
  */
-public enum OpenTelemetryHttpLowCardinalityKeyNames implements KeyName {
+// TODO: This could go to a separate, "core" module?
+public interface HttpKeyValuesConvention<REQ, RES> extends Observation.KeyValuesConvention {
 
     /**
      * HTTP request method.
      *
      * Examples: GET; POST; HEAD
-     * @param request
-     * @return
+     * @param request HTTP request
+     * @return key value
      */
-    METHOD {
-        @Override
-        public String getKeyName() {
-            return SemanticAttributes.HTTP_METHOD.getKey();
-        }
-    },
+    KeyValue method(REQ request);
 
     /**
      * Full HTTP request URL in the form scheme://host[:port]/path?query[#fragment].
@@ -46,107 +43,65 @@ public enum OpenTelemetryHttpLowCardinalityKeyNames implements KeyName {
      * included nevertheless.
      *
      * Examples: https://www.foo.bar/search?q=OpenTelemetry#SemConv
-     * @param request
-     * @return
+     * @param request HTTP request
+     * @return key value
      */
-    URL {
-        @Override
-        public String getKeyName() {
-            return SemanticAttributes.HTTP_URL.getKey();
-        }
-
-    },
+    KeyValue url(REQ request);
 
     /**
      * The full request target as passed in a HTTP request line or equivalent.
      *
      * Examples: /path/12314/?q=ddds#123
-     * @param request
-     * @return
+     * @param request HTTP request
+     * @return key value
      */
-    TARGET {
-        @Override
-        public String getKeyName() {
-            return SemanticAttributes.HTTP_TARGET.getKey();
-        }
-
-    },
+    KeyValue target(REQ request);
 
     /**
      * The value of the HTTP host header. An empty Host header should also be reported,
      * see note.
      *
      * Examples: www.example.org
-     * @param request
-     * @return
+     * @param request HTTP request
+     * @return key value
      */
-    HOST {
-        @Override
-        public String getKeyName() {
-            return SemanticAttributes.HTTP_HOST.getKey();
-        }
-
-    },
+    KeyValue host(REQ request);
 
     /**
      * The URI scheme identifying the used protocol.
      *
      * Examples: http; https
-     * @param request
-     * @return
+     * @param request HTTP request
+     * @return key value
      */
-    SCHEME {
-        @Override
-        public String getKeyName() {
-            return SemanticAttributes.HTTP_SCHEME.getKey();
-        }
-
-    },
+    KeyValue scheme(REQ request);
 
     /**
      * HTTP response status code.
      *
      * Examples: 200
-     * @param response
-     * @return
+     * @param response HTTP response
+     * @return key value
      */
-    STATUS_CODE {
-        @Override
-        public String getKeyName() {
-            return SemanticAttributes.HTTP_STATUS_CODE.getKey();
-        }
-
-    },
+    KeyValue statusCode(RES response);
 
     /**
      * Kind of HTTP protocol used.
      *
      * Examples: 1.0
-     * @param request
-     * @return
+     * @param request HTTP request
+     * @return key value
      */
-    FLAVOR {
-        @Override
-        public String getKeyName() {
-            return SemanticAttributes.HTTP_FLAVOR.getKey();
-        }
-
-    },
+    KeyValue flavor(REQ request);
 
     /**
      * Value of the HTTP User-Agent header sent by the client.
      *
      * Examples: CERN-LineMode/2.15 libwww/2.17b3
-     * @param request
-     * @return
+     * @param request HTTP request
+     * @return key value
      */
-    USER_AGENT {
-        @Override
-        public String getKeyName() {
-            return SemanticAttributes.HTTP_USER_AGENT.getKey();
-        }
-
-    },
+    KeyValue userAgent(REQ request);
 
     /**
      * The size of the request payload body in bytes. This is the number of bytes
@@ -155,16 +110,10 @@ public enum OpenTelemetryHttpLowCardinalityKeyNames implements KeyName {
      * compressed size.
      *
      * Examples: 3495
-     * @param request
-     * @return
+     * @param request HTTP request
+     * @return key value
      */
-    REQUEST_CONTENT_LENGTH {
-        @Override
-        public String getKeyName() {
-            return SemanticAttributes.HTTP_REQUEST_CONTENT_LENGTH.getKey();
-        }
-
-    },
+    KeyValue requestContentLength(REQ request);
 
     /**
      * The size of the response payload body in bytes. This is the number of bytes
@@ -173,45 +122,39 @@ public enum OpenTelemetryHttpLowCardinalityKeyNames implements KeyName {
      * compressed size.
      *
      * Examples: 3495
-     * @param response
-     * @return
+     * @param response HTTP response
+     * @return key value
      */
-    RESPONSE_CONTENT_LENGTH {
-        @Override
-        public String getKeyName() {
-            return SemanticAttributes.HTTP_RESPONSE_CONTENT_LENGTH.getKey();
-        }
-
-    },
+    KeyValue responseContentLength(RES response);
 
     /**
      * Remote address of the peer (dotted decimal for IPv4 or RFC5952 for IPv6)
      *
      * Examples: 127.0.0.1
-     * @param request
-     * @return
+     * @param request HTTP request
+     * @return key value
      */
-    IP {
-        @Override
-        public String getKeyName() {
-            return SemanticAttributes.NET_PEER_IP.getKey();
-        }
-
-    },
+    KeyValue ip(REQ request);
 
     /**
      * Remote port number.
      *
      * Examples: 80; 8080; 443
-     * @param request
-     * @return
+     * @param request HTTP request
+     * @return key value
      */
-    PORT {
-        @Override
-        public String getKeyName() {
-            return SemanticAttributes.NET_PEER_PORT.getKey();
-        }
+    KeyValue port(REQ request);
 
+    /**
+     * Sets all key values.
+     * @param request HTTP request
+     * @param response HTTP response
+     * @return all key values
+     */
+    default KeyValues all(REQ request, RES response) {
+        return KeyValues.of(method(request), url(request), target(request), host(request), scheme(request),
+                statusCode(response), flavor(request), userAgent(request), requestContentLength(request),
+                responseContentLength(response), ip(request), port(request));
     }
 
 }

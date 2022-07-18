@@ -16,38 +16,37 @@
 package io.micrometer.convention.otel.http;
 
 import io.micrometer.common.KeyValue;
+import io.micrometer.convention.HttpServerKeyValuesConvention;
 import io.micrometer.observation.Observation;
-import io.micrometer.observation.transport.http.*;
-import io.micrometer.observation.transport.http.context.HttpServerContext;
-import io.micrometer.observation.transport.http.tags.HttpServerKeyValuesConvention;
+import io.micrometer.observation.transport.RequestReplyReceiverContext;
 
 /**
  * Conventions for HTTP key values implemented with OpenTelemetry.
  *
  * @author Marcin Grzejszczak
- * @since 1.10.0
+ * @since 1.0.0
  */
 // TODO: What to do if request is not set? UNKNOWN?
-public class OpenTelemetryHttpServerConvention  extends OpenTelemetryHttpConvention<HttpServerRequest, HttpServerResponse, HttpServerContext>
-        implements HttpServerKeyValuesConvention {
+public abstract class OpenTelemetryHttpServerConvention<REQ, RES>  extends OpenTelemetryHttpConvention<REQ, RES, RequestReplyReceiverContext<REQ, RES>>
+        implements HttpServerKeyValuesConvention<REQ, RES> {
 
     @Override
-    public KeyValue serverName(HttpRequest request) {
+    public KeyValue serverName(REQ request) {
         return OpenTelemetryHttpServerLowCardinalityKeyNames.SERVER_NAME.of("UNKNOWN");
     }
 
     @Override
-    public KeyValue route(HttpRequest request) {
+    public KeyValue route(REQ request) {
         return OpenTelemetryHttpServerLowCardinalityKeyNames.ROUTE.of("UNKNOWN");
     }
 
     @Override
-    public KeyValue templatedRoute(HttpRequest request) {
+    public KeyValue templatedRoute(REQ request) {
         return OpenTelemetryHttpServerLowCardinalityKeyNames.TEMPLATED_ROUTE.of("UNKNOWN");
     }
 
     @Override
-    public KeyValue clientIp(HttpRequest request) {
+    public KeyValue clientIp(REQ request) {
         return OpenTelemetryHttpServerLowCardinalityKeyNames.CLIENT_IP.of("UNKNOWN");
     }
 
@@ -58,6 +57,6 @@ public class OpenTelemetryHttpServerConvention  extends OpenTelemetryHttpConvent
 
     @Override
     public boolean supportsContext(Observation.Context context) {
-        return context instanceof HttpServerContext;
+        return context instanceof RequestReplyReceiverContext;
     }
 }
