@@ -22,4 +22,4 @@ gradleEnterprise {
 	server = 'https://ge.micrometer.io'
 }
 
-include 'micrometer-otel-conventions-experimental', 'micrometer-otel-conventions-experimental-bom', 'micrometer-otel-conventions-experimental-semver'
+include 'micrometer-conventions-experimental', 'micrometer-otel-conventions-experimental', 'micrometer-otel-conventions-experimental-bom', 'micrometer-otel-conventions-experimental-semver'

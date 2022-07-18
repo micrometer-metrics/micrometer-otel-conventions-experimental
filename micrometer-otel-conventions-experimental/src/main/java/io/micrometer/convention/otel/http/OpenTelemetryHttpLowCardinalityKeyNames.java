@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package io.micrometer.convention.http.tag;
+package io.micrometer.convention.otel.http;
 
 import io.micrometer.common.docs.KeyName;
 import io.micrometer.conventions.semantic.SemanticAttributes;
@@ -22,7 +22,7 @@ import io.micrometer.conventions.semantic.SemanticAttributes;
  * Conventions for HTTP key names implemented with OpenTelemetry.
  *
  * @author Marcin Grzejszczak
- * @since 1.10.0
+ * @since 1.0.0
  */
 public enum OpenTelemetryHttpLowCardinalityKeyNames implements KeyName {
 
